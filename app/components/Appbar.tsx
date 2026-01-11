@@ -1,19 +1,31 @@
 'use client';
 import { signIn, signOut, useSession } from "next-auth/react"
-import PrimaryButton from "./PrimaryButton";
 
-
-export const Appbar = () =>{
+export const Appbar = () => {
     const session = useSession();
-    return <div className="border-b px-2 py-2 flex justify-between">
-        <div className="font-bold text-lg flex-col justify-center">
-            Blockway
+    
+    return (
+        <div className="border-b border-gray-800 px-6 py-4 flex justify-between items-center bg-black text-white">
+            <div className="font-black text-lg tracking-tight">
+                BLOCKWAY
+            </div>
+            <div>
+                {session.data?.user ? (
+                    <button
+                        onClick={() => signOut()}
+                        className="px-6 py-2 bg-white text-black font-mono font-bold rounded-none hover:bg-black hover:text-white hover:border-white transition-all duration-300 uppercase tracking-wide text-xs border-2 border-white"
+                    >
+                        Log Out
+                    </button>
+                ) : (
+                    <button
+                        onClick={() => signIn()}
+                        className="px-6 py-2 bg-white text-black font-mono font-bold rounded-none hover:bg-black hover:text-white hover:border-white transition-all duration-300 uppercase tracking-wide text-xs border-2 border-white"
+                    >
+                        Sign In
+                    </button>
+                )}
+            </div>
         </div>
-        <div>
-            {session.data?.user?<PrimaryButton onClick={() => signOut()}>Log Out</PrimaryButton>:
-            
-            
-            <PrimaryButton onClick={() => signIn()}>Sign In</PrimaryButton>}            
-        </div>
-    </div>
+    )
 }
