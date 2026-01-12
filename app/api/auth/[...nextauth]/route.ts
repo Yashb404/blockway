@@ -13,7 +13,17 @@ const handler = NextAuth({
       if (url.startsWith("/")) return `${baseUrl}${url}`
       else if (new URL(url).origin === baseUrl) return url
       return `${baseUrl}/dashboard`
-    }
+    },
+    async signIn({user,account,profile,email,credentials}){
+      if (account?.provider === "google"){
+      const email = user.email;
+      if (!email){
+        return false
+      }
+      return true}
+
+      return false
+    },
   },
   pages: {
     signIn: '/',
