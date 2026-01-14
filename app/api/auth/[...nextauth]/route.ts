@@ -1,5 +1,7 @@
 import NextAuth from "next-auth"
 import GoogleProvider from "next-auth/providers/google";
+import { prisma } from "@/lib/prisma";
+import { Keypair } from "@solana/web3.js";
 
 const handler = NextAuth({
   providers: [
@@ -16,11 +18,45 @@ const handler = NextAuth({
     },
     async signIn({user,account,profile,email,credentials}){
       if (account?.provider === "google"){
-      const email = user.email;
-      if (!email){
-        return false
+        const userEmail = user.email;
+        if (!userEmail){
+          return false
+        }
+
+        const userExists = await prisma.user.findFirst({
+          where: {
+            username: userEmail
+          }
+        }); 
+        
+        if (userExists) {
+          return true;
+        }
+
+        const keypair = Keypair.generate();
+        const publicKey = keypair.publicKey.toBase58();
+        const privateKey = keypair.secretKey;
+
+        await prisma.user.create({
+          data:{
+            username: userEmail,
+            provider: "Google",
+            solWallet:{
+              create:{
+                publicKey: publicKey,
+                privateKey: privateKey.toString()
+              }
+            },
+            inrWallet:{
+              create: {
+                balance: 0
+              }
+            }
+          }
+        })
+        
+        return true;
       }
-      return true}
 
       return false
     },

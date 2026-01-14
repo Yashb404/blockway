@@ -12,6 +12,7 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
+    "@solana/web3.js": "^1.98.4",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "framer-motion": "^12.25.0",
