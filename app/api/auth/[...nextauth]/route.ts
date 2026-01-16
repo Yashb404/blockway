@@ -40,6 +40,9 @@ const handler = NextAuth({
         await prisma.user.create({
           data:{
             username: userEmail,
+            name: profile?.name,
+            //@ts-ignore
+            profilePicture: profile?.picture,            
             provider: "Google",
             solWallet:{
               create:{
