@@ -1,7 +1,7 @@
 import type { NextAuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import { prisma } from "@/lib/prisma"
-import { Keypair } from "@solana/web3.js"
+import { generateKeyPair, getAddressFromPublicKey } from "@solana/kit"
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -33,9 +33,18 @@ export const authOptions: NextAuthOptions = {
           return true
         }
 
-        const keypair = Keypair.generate()
-        const publicKey = keypair.publicKey.toBase58()
-        const privateKey = keypair.secretKey
+        // We generate the keypair using native Web Crypto API to ensure it is marked as 'extractable'.
+        // The helper `generateKeyPair` from @solana/kit might default to non-extractable keys for security.
+        const keyPair = (await crypto.subtle.generateKey(
+          "Ed25519",
+          true, // extractable
+          ["sign", "verify"]
+        )) as CryptoKeyPair
+
+        const publicKey = await getAddressFromPublicKey(keyPair.publicKey)
+        // Export the private key to a format we can store (PKCS8 for Ed25519 private keys)
+        const exportedPrivateKey = await crypto.subtle.exportKey("pkcs8", keyPair.privateKey)
+        const privateKey = new Uint8Array(exportedPrivateKey).toString()
 
         await prisma.user.create({
           data: {
@@ -47,7 +56,7 @@ export const authOptions: NextAuthOptions = {
             solWallet: {
               create: {
                 publicKey,
-                privateKey: privateKey.toString(),
+                privateKey,
               },
             },
             inrWallet: {
