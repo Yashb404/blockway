@@ -5,7 +5,7 @@ export const Appbar = () => {
     const session = useSession();
     
     return (
-        <div className="border-b border-gray-800 px-6 py-4 flex justify-between items-center bg-black text-white">
+        <div className="border-b border-gray-800 px-6 py-4 flex justify-between items-center bg-black text-white w-full max-w-screen-2xl mx-auto">
             <div className="font-black text-lg tracking-tight">
                 BLOCKWAY
             </div>
