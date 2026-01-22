@@ -1,21 +1,21 @@
-'use client';
+"use client"
 
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import Hero from "./components/Hero";
-import LoginSection from "./components/LoginSection";
-import Footer from "./components/Footer";
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
+import Hero from "./components/Hero"
+import LoginSection from "./components/LoginSection"
+import Footer from "./components/Footer"
 
 export default function Home() {
-  const session = useSession();
-  const router = useRouter();
+  const session = useSession()
+  const router = useRouter()
 
   useEffect(() => {
     if (session.status === "authenticated") {
-      router.push("/dashboard");
+      router.push("/dashboard")
     }
-  }, [session.status, router]);
+  }, [session.status, router])
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-black text-white font-sans">
@@ -32,5 +32,5 @@ export default function Home() {
         </div>
       </main>
     </div>
-  );
+  )
 }
