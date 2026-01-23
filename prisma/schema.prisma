@@ -23,23 +23,47 @@ model User {
   solWalletId     String?
   solWallet       SolWallet?
   inrWalletId     String?
-  inrWallet       InrWalet?
+  inrWallet       InrWallet?
   provider        Provider
+  transactions    Transaction[]
 }
 
-model InrWalet {
+model InrWallet {
   id          String    @id  @default(uuid())  
   balance     Int       
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id])
+  userId      String    @unique
+  user        User      @relation(fields: [userId], references: [id])
 }
 
 model SolWallet {
   id          String   @id  @default(uuid())
   publicKey   String
   privateKey  String
+  balance     Float    @default(0)
   userId      String   @unique
   user        User     @relation(fields: [userId], references: [id])
+}
+
+model Transaction {
+  id        String   @id @default(uuid())
+  status    TxStatus
+  type      TxType
+  amount    Int      
+  timestamp DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+enum TxStatus {
+  Processing
+  Success
+  Failure
+}
+
+enum TxType {
+  Deposit
+  Withdraw
+  Swap
 }
 
 enum Provider {
