@@ -23,6 +23,11 @@ export default async function DashboardPage() {
     include: {
       inrWallet: true,
       solWallet: true,
+      transactions: {
+        orderBy: {
+          timestamp: 'desc'
+        }
+      }
     },
   })
 
@@ -32,6 +37,17 @@ export default async function DashboardPage() {
 
   const inrBalance = user.inrWallet?.balance ?? 0
   const solPublicKey = user.solWallet?.publicKey ?? ""
+  const solBalance = user.solWallet?.balance ?? 0
+
+  const transactions = user.transactions.map((t: any) => ({
+    id: t.id,
+    type: t.type,
+    amount: `₹${t.amount / 100}`, // Assuming amount is in paisa or similar unit, logically int. Or just t.amount. Let's keep t.amount for now or format it.
+    value: t.status, // The component expects 'value' string? Checking definition later.
+    time: t.timestamp.toLocaleDateString(),
+    status: t.status
+  }));
+
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -54,7 +70,7 @@ export default async function DashboardPage() {
 
         {/* Middle Section: Wallets */}
         <div className="mb-8 md:mb-12">
-          <WalletSection inrBalance={inrBalance} solBalance={0} solPublicKey={solPublicKey} />
+          <WalletSection inrBalance={inrBalance} solBalance={solBalance} solPublicKey={solPublicKey} />
         </div>
 
         {/* Trading & History Section */}
@@ -63,8 +79,9 @@ export default async function DashboardPage() {
             <TradingInterface />
           </div>
           <div className="lg:col-span-1">
-            <TransactionHistory transactions={[]} />
+            <TransactionHistory transactions={transactions} />
           </div>
+
         </div>
       </main>
     </div>

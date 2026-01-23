@@ -23,51 +23,57 @@ export const authOptions: NextAuthOptions = {
           return false
         }
 
-        const userExists = await prisma.user.findFirst({
-          where: {
-            username: userEmail,
-          },
-        })
+        try {
+          const userExists = await prisma.user.findFirst({
+            where: {
+              username: userEmail,
+            },
+          })
 
-        if (userExists) {
+          if (userExists) {
+            return true
+          }
+
+          // We generate the keypair using native Web Crypto API to ensure it is marked as 'extractable'.
+          // The helper `generateKeyPair` from @solana/kit might default to non-extractable keys for security.
+          const keyPair = (await crypto.subtle.generateKey(
+            "Ed25519",
+            true, // extractable
+            ["sign", "verify"]
+          )) as CryptoKeyPair
+
+          const publicKey = await getAddressFromPublicKey(keyPair.publicKey)
+          // Export the private key to a format we can store (PKCS8 for Ed25519 private keys)
+          const exportedPrivateKey = await crypto.subtle.exportKey("pkcs8", keyPair.privateKey)
+          const privateKey = new Uint8Array(exportedPrivateKey).toString()
+
+          await prisma.user.create({
+            data: {
+              username: userEmail,
+              name: profile?.name,
+              // @ts-ignore
+              profilePicture: profile?.picture,
+              provider: "Google",
+              solWallet: {
+                create: {
+                  publicKey,
+                  privateKey,
+                  balance: 0,
+                },
+              },
+              inrWallet: {
+                create: {
+                  balance: 0,
+                },
+              },
+            },
+          })
+
           return true
+        } catch (e) {
+          console.error("Error creating user", e)
+          return false
         }
-
-        // We generate the keypair using native Web Crypto API to ensure it is marked as 'extractable'.
-        // The helper `generateKeyPair` from @solana/kit might default to non-extractable keys for security.
-        const keyPair = (await crypto.subtle.generateKey(
-          "Ed25519",
-          true, // extractable
-          ["sign", "verify"]
-        )) as CryptoKeyPair
-
-        const publicKey = await getAddressFromPublicKey(keyPair.publicKey)
-        // Export the private key to a format we can store (PKCS8 for Ed25519 private keys)
-        const exportedPrivateKey = await crypto.subtle.exportKey("pkcs8", keyPair.privateKey)
-        const privateKey = new Uint8Array(exportedPrivateKey).toString()
-
-        await prisma.user.create({
-          data: {
-            username: userEmail,
-            name: profile?.name,
-            // @ts-ignore
-            profilePicture: profile?.picture,
-            provider: "Google",
-            solWallet: {
-              create: {
-                publicKey,
-                privateKey,
-              },
-            },
-            inrWallet: {
-              create: {
-                balance: 0,
-              },
-            },
-          },
-        })
-
-        return true
       }
 
       return false
