@@ -64,7 +64,7 @@ export default async function DashboardPage() {
             />
           </div>
           <div className="lg:col-span-2">
-            <PortfolioOverview inrBalance={inrBalance} solBalance={0} />
+            <PortfolioOverview inrBalance={inrBalance} solBalance={solBalance} />
           </div>
         </div>
 

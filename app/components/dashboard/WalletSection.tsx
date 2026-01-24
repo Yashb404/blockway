@@ -1,6 +1,7 @@
 "use client"
 
 import { Copy, Send, Download } from "lucide-react"
+import { useState, useEffect } from "react"
 
 type WalletSectionProps = {
   inrBalance: number
@@ -13,6 +14,14 @@ const formatInr = (value: number) =>
 
 export default function WalletSection({ inrBalance, solBalance, solPublicKey }: WalletSectionProps) {
   const displayPublicKey = solPublicKey || "Not available"
+  const [solValueInr, setSolValueInr] = useState(0);
+
+  useEffect(() => {
+     fetch('/api/jupiter?type=price')
+        .then(r => r.json())
+        .then(d => { if(d.price) setSolValueInr(d.price * (d.rate||86.5) * solBalance); })
+        .catch(() => {});
+  }, [solBalance]);
 
   return (
     <div className="space-y-6">
@@ -56,10 +65,7 @@ export default function WalletSection({ inrBalance, solBalance, solPublicKey }: 
           <div>
             <p className="text-xs text-neutral-400 uppercase tracking-wide mb-2">SOL Balance</p>
             <p className="text-3xl md:text-4xl font-bold">{solBalance.toFixed(2)} SOL</p>
-            <p className="text-sm text-neutral-400 mt-1">≈ {formatInr(0)}</p>
-          </div>
-
-          <div className="bg-neutral-900 rounded p-4 flex items-center justify-between">
+            <p className="text-sm text-neutral-400 mt-1">≈ {formatInr(solValueInr)}</p>
             <code className="text-xs md:text-sm text-neutral-300 break-all">{displayPublicKey}</code>
             <button className="p-2 hover:bg-neutral-800 rounded transition-colors shrink-0">
               <Copy size={16} />
